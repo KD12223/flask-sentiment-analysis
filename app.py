@@ -10,8 +10,7 @@ comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
 # Determines the sentiment of text and returns the results
 @app.route('/analyze', methods=['POST'])
 def analyze_text():
-    body = request.get_json()
-    text = body.get('content')
+    text = request.get_json().get('content')
 
     if text:
         return jsonify(comprehend.detect_sentiment(Text=text, LanguageCode='en'))
