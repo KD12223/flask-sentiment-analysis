@@ -10,12 +10,17 @@ comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
 # Determines the sentiment of text and returns the results
 @app.route('/analyze', methods=['POST'])
 def analyze_text():
-    text = request.get_json().get('content')
+    body = request.get_json()
 
-    if text:
-        return jsonify(comprehend.detect_sentiment(Text=text, LanguageCode='en'))
+    if body:
+        text = request.get_json().get('content')
+
+        if text:
+            return jsonify(comprehend.detect_sentiment(Text=text, LanguageCode='en'))
+        else:
+            raise BadRequest('The content is missing from the request')
     else:
-        raise BadRequest('The content is missing from the request')
+        raise BadRequest('The JSON body was not POSTED')
 
 
 # Handles all exceptions
