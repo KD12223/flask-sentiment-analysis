@@ -1,11 +1,32 @@
-from flask import Flask
+import boto3 as boto3
+from flask import Flask, jsonify, request
+from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
 
+comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+
+# Determines the sentiment of text and returns the results
+@app.route('/analyze', methods=['POST'])
+def analyze_text():
+    body = request.get_json()
+
+    if body:
+        text = request.get_json().get('content')
+
+        if text:
+            return jsonify(comprehend.detect_sentiment(Text=text, LanguageCode='en'))
+        else:
+            raise BadRequest('The content is missing from the request')
+    else:
+        raise BadRequest('The JSON body was not POSTED')
+
+
+# Handles all exceptions
+@app.errorhandler(Exception)
+def exception_handler(e):
+    return jsonify(e.description), e.code
 
 
 if __name__ == '__main__':
